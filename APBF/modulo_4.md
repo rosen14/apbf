@@ -875,6 +875,46 @@ El camino recorrido por las variables aleatorias $\vec z_i = f_i(\vec z_{i-1})$ 
 
 El muestreo de estas transformaciones resulta super conveniente y sencillo. Se muestrea un vector aleatorio de $\vec z_0 \sim p_0$, la cuál normalmente es una distribución Gaussiana multivariada (fácil de muestrear). Luego se transforma mediante $\vec x=G(\vec z_0)=f_K \circ f_{K-1} \circ \cdots \circ f_1(\vec z_0)$ y su probabilidad se calcula transformando $p_0(\vec z_0)$ a $p_X(\vec x)$ como explicado anteriormente. 
 
+### Inclusión de redes neuronales
+
+Hasta el momento sólo vimos que podemos transformar una distribución de probabilidad en otra si aplicamos una serie de transformaciones simples que sean invertibles y diferenciables. La simplicidad viene dada por la capacidad de diferenciarla e invertirla que tengamos y de qué tan simple resulta calcular el Jacobiano de la transformación. En vez de estar eligiendo y diseñando qué funciones utilizar, resulta conveniente directamente plantear redes neuronales como las funciones $f_i$, ya que tenemos la capacidad de derivarlas gracias a la auto-diferenciación y diseñarlas de manera tal que cumpla con la invertibilidad y la facilidad de calcular el Jacobiano. Para ser invertibles, resulta necesario que es espacio latente de cada red neuronal (es decir, la dimensionalidad de salida) sea de la misma dimensión que el vector de entrada. Una vez que tenemos las funciones $f_i$ parametrizadas por los parámetros de redes neuronales, podemos entrenarlas utilizando la maximización de la log-verosimilitud, utilizando la ecuación que obtuvimos antes para $\log p_X(\vec x)$.
+
+Como ejemplo, vamos a explorar un modelo de NF que se llama *Real NVP* (real-valued non-volume preserving). La base de este modelo es una capa llamada capa de acoplamiento afin (Affine Coupling Layer). Cuando se utiliza este tipo de capa en la dirección hacia delante (*forward pass*) se divide al vector de entrada $\vec x$ en dos partes, una de dimensión $d$ y otra de dimensión $D-d$, siendo $D$ la dimensión de $\vec{x}$. Una de las dos partes no se modifica en absoluto y pasa tal cuál entra hacia la salida $\vec y$ de la capa. Si suponemos que es la primer parte de dimensión $d$ la que pasa sin modificación por la capa, entonces podemos decir que los primero $d$ elementos de $\vec y$ son los primeros $d$ elementos de $\vec x$, i.e. $\vec y_{1:d} = \vec x_{1:d}$. Los elementos restantes $\vec x_{(d+1):D}$ serán transformados mediante un escaleo $s$ y un corrimiento $t$ que serán función de la primer parte del vector de entrada $\vec x_{1:d}$ y se aprenderán mediante perceptrones múltiples, donde 
+
+$$
+\vec y_{(d+1):D} = \vec x_{(d+1):D} \odot \exp(s(\vec x_{1:d})) + t(\vec x_{1:d}).
+$$
+
+
+La exponencial aparece porque se predice utilizando la log-verosimilitud y estabiliza el entrenamiento. Ahora, esta función ¿cumple con lo que necesitábamos para tener una transformación útil para un flujo normalizador? Necesitabamos que sea invertible. Invertir esta operación resulta posible gracias a que dividimos el vector de entrada en dos partes, tenemos esa "memoria" de la entrada en la salida y las transformaciones dependen de esa memoria. Como escalear (multiplicar por una constante) y realizar un desplazamiento (sumar una constante) son transformaciones invertibles, entonces podemos a partir de $\vec y$ calcular la constante multiplicativa, la constante aditiva con los dos perceptrones múltiples $s(\vec y_{1:d})$ y $t(\vec y_{1:d})$, restar la constante aditiva y dividir por la multiplicativa y así obtener $\vec x_{(d+1):D} = (\vec y_{(d+1):D} - t(\vec{y_{1:d}})) \odot \exp (-s(\vec y_{1:d}))$. La primer parte del vector de entrada queda exactamente igual a la primera parte del vector de salida en la operación inversa. 
+
+Por otro lado, el cálculo del determinante del Jacobiano no pareciera ser fácil ya que tenemos un vector de entrada de dimensión $D$, por lo que deberíamos calcular $D^2$ elementos del Jacobiano, lo que sería extremadamente costoso de calcular en cada iteración del entrenamiento. Debido a la estructura que planteamos para la capa de acoplamiento afin, el Jacobiano tendrá la forma
+
+$$
+\mathbf J = \left[
+\begin{matrix}
+\mathbb I_d & 0 \\
+\frac{\partial \vec y_{(d+1):D}}{\partial \vec x_{1:d}} & \text{diag} (\exp (s(\vec x_{1:d}))) \\
+\end{matrix}    
+\right].
+$$
+
+Esta matriz es una matriz triangular inferior, y por lo tanto el determinante de este tipo de matriz es el producto de los elementos diagonales! Por lo tanto, el determinante se simplifica de manera grata a 
+
+$$
+\det \mathbf J = \exp (\sum_j s(\vec x_{1:d})_j),
+$$
+
+que como luego utilizamos el logaritmo del determinante del Jacobiano, nos queda simplemente la sumatoria de los factores de escaleo producidos por la red. Así, finalmente el logaritmo de la verosimilitud queda escrito como
+
+$$
+\log p_X(x) = \log p_0(\vec z_0) + \sum_{n=1}^N \sum_j s(\vec {z_n}_{1:d})_j.
+$$
+
+Finalmente, el modelo de NF Real NVP no es más que la aplicación sucesiva reiterada de estas capas de acoplamiento afin. Ahora, si pensamos que siempre estamos dejando pasar exactamente igual la primer parte del vector de entrada en cada capa, entonces al final tendremos siempre esa parte del vector intacto a la salida del modelo Real NVP. Como no queremos esto, lo que los autores hacen es alternar en cada capa cuál parte del vector pasa y cual se modifica mediante la transformación de acoplamiento afin. 
+
+Veremos un ejemplo a continuación para entenderlo mejor.
+
 ## Ejemplo: Aprendiendo Gaussianas
 
 Primero generamos un conjunto de datos que proviene de una mezcla de densidades Gaussianas. 
