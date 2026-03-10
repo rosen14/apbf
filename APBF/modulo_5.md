@@ -130,14 +130,29 @@ El método que vimos anteriormente es costoso computacionalmente, ya que requier
 
 Una alternativa que viene del lado del aprendizaje profundo es utilizar redes neuronales para *aprender* directamente relaciones probabilísticas entre parámetros y datos simulados. Este enfoque es el que se denomina *inferencia basada en simulaciones* (SBI, del inglés Simulation Based Inference).
 
-La idea central de SBI es aprovechar la capacidad de los simuladores en generar pares de parámetros y datos $(\theta, x_{sim})\sim p(\theta) p(x_{sim}|\theta)$. Generando muchos pares mediante simulación, resulta posible entrenar los modelos probabilísticos visto anteriormente que aproximen las distribuciones relevantes para la inferencia Bayesiana. Dependiendo de qué distribución se desea aproximar, existen diferentes estrategias dentro de SBI. Podemos aproximar la distribución a posterior (Estimación Neuronal de la Posterior, NPE), la verosimilitud (Estimación Neuronal de la Verosimilitud, NLE) y también el cociente (o razón) entre la verosimilitud y la evidencia (Estimación Neuronal de la Razón, NRE), que explicaremos a continuación.
+La idea central de SBI es aprovechar la capacidad de los simuladores en generar pares de parámetros y datos $(\theta, x_{sim})\sim p(\theta) p(x_{sim}|\theta)$. Generando muchos pares mediante simulación, resulta posible entrenar los modelos probabilísticos visto anteriormente que aproximen las distribuciones relevantes para la inferencia Bayesiana.  Dependiendo de qué distribución se desea aproximar, existen diferentes estrategias dentro de SBI. Podemos aproximar la distribución a posterior (Estimación Neuronal de la Posterior, NPE), la verosimilitud (Estimación Neuronal de la Verosimilitud, NLE) y también el cociente (o razón) entre la verosimilitud y la evidencia (Estimación Neuronal de la Razón, NRE), que explicaremos a continuación.
 
 Algnas ventajas de SBI frente a métodos como ABC son que escala mejor a datos de alta dimensión, puede reutilizar simulaciones para diferentes conjuntos de datos observados, aprovecha la capacidad de representación de los modelos probabilísticos, permite realizar inferencia en simuladores complejos, entre otras. Por esta razón es que SBI se ha vuelto una herramienta muy utilizada en áreas como la cosmología, física de partículas, biología y geología. Principalmente en áreas donde existen simuladores muy fidedignos de la realidad observada.
 
 ### Estimación de densidad neuronal e inferencia amortizada
 
+Los métodos recientes de SBI utilizan redes neuronales (neural SBI) para aprender relaciones probabilísticas entre los datos simulados $\vec x_{sim}$ y los parámetros del modelo $\theta$. Para esto, se generan pares de simulaciones $(\theta, \vec x_{sim})$ utilizando un buen simulador del modelo. 
+
+Si se intenta aprender la distribución posterior, es decir la distribución condicional de los parámetros dada una observación $p(\theta|\vec x_{obs})$ entonces estaremos haciendo estimación neuronal de la distribución posterior (NPE, del inglés *neural posterior estimation*). Es importante notar que estamos intentando estimar una distribución para los parámetros condicional a los datos observados. Una vez entrenada utilizando simulaciones, puede ser evaluada en *cualquier* observación para obtener una aproximación de la distribución posterior de los parámetros. A esto se le llama inferencia amortizada, ya que se entrena una vez una red neuronal de inferencia, y luego se puede utilizar en inferencia para toda observación, sin tener que reentrenar si se mide una nueva observación.
+
+A la red neuronal que entrenamos, que predice los parámetros de una distribución de probabilidad sobre $\theta$ condicionada a los datos de entrada $\vec x$ la llamaremos red de inferencia $q_{\phi}(\theta | \vec x)$, donde $\phi$ son los parámetros entrenables de la red neuronal. Por ejemplo, supongamos que la distribución posterior es aproximadamente gaussiana, entonces la red neuronal va a aprender un mapeo no linean entre los datos de entrada $\vec x$ y los parámetros de la gaussiana (la media y varianza) para los parámetros del simulador $\theta$. Para lograr esto, $q_{\phi}$ se entrena minimizando la función de costo 
+
+$$
+\mathcal L (\phi) = \mathbb E_{(\theta, \vec x)\sim p(\theta, \vec x)\left[- \log q_{\phi}(\theta | \vec x)\right]},
+$$
+
+la cual incentiva a la red a asignar probabilidad alta a los parámetros $\theta$ del conjunto de datos de entrenamiento que generaron los datos simulados $\vec x$ correspondientes. Resulta importante notar que en el momento de entrenamiento se utilizan únicamente datos simulados. Generalmente, como modelo de red neuronal para aprender esta distribución de probabilidad, se utilizan los flujos normalizadores discutidos en el módulo anterior, los cuáles son lo suficientemente flexibles como para capturar distribuciones posteriores distintas a la Gaussiana. 
+
 
 ### Algunos comentarios sobre los simuladores
+
+Necesitamos simuladores estocásticos. Esto es, simuladores que tengan algún grado de aleatoriedad en el resultado para el mismo conjunto de parámetros de entrada.
+
 
 
 ```{bibliography}
