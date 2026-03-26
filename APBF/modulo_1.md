@@ -158,11 +158,11 @@ En resumen, este ejemplo ilustra el aprendizaje supervisado porque el modelo se 
 
 ### Ejemplo de Aprendizaje No Supervisado: Agrupamiento de Estados
 
-Uno de los desafíos común es es clasificar distintos estados basados en sus propiedades intrínsecas. Supongamos que tenemos un conjunto de datos que representa diferentes estados cuánticos, caracterizados por ciertas medidas experimentales como la energía, el momento angular y el espín. Sin etiquetas que indiquen a qué categoría pertenece cada estado, el objetivo es identificar patrones o grupos dentro de estos datos que puedan sugerir diferentes tipos de estados.
+Uno de los desafíos común es es clasificar distintos estados basados en sus propiedades intrínsecas. Supongamos que tenemos un conjunto de datos que representa diferentes estados. Supongamos que no contamos con etiquetas que indiquen a qué categoría pertenece cada estado, el objetivo es identificar patrones o grupos dentro de estos datos que puedan sugerir diferencias.
 
 Para abordar este problema, utilizaremos el algoritmo de agrupamiento k-means, una técnica de aprendizaje no supervisado que busca dividir un conjunto de datos en k grupos distintos, donde cada grupo contiene datos similares entre sí.
 
-Generaremos un conjunto de datos sintético que simula las características de los estados cuánticos utilizando la librería `scikit-learn`. 
+Generaremos un conjunto de datos sintético que simula las características de los estados utilizando la librería `scikit-learn`. 
 ```{code-cell} ipython3
 import numpy as np
 import matplotlib.pyplot as plt
@@ -174,7 +174,7 @@ np.random.seed(42)
 X, _ = make_blobs(n_samples=300, centers=3, cluster_std=0.60, random_state=0)
 ```
 
-Luego, utilizando la misma librería aplicaremos el algoritmo k-means para clasificar los datos en grupos. Finalmente, visualizaremos los resultados utilizando Matplotlib para observar cómo se agrupan los estados cuánticos.
+Luego, utilizando la misma librería aplicaremos el algoritmo k-means para clasificar los datos en grupos. Finalmente, visualizaremos los resultados utilizando Matplotlib para observar cómo se agrupan los estados.
 
 ```{code-cell} ipython3
 # Aplicar el algoritmo k-means
@@ -187,7 +187,7 @@ plt.figure(figsize=(8, 6))
 plt.scatter(X[:, 0], X[:, 1], c=y_kmeans, s=50, cmap='viridis')
 centers = kmeans.cluster_centers_
 plt.scatter(centers[:, 0], centers[:, 1], c='red', s=200, alpha=0.75, marker='X', label='Centroides')
-plt.title('Agrupamiento de Estados Cuánticos')
+plt.title('Agrupamiento de Estados')
 plt.xlabel('Característica 1')
 plt.ylabel('Característica 2')
 plt.legend()
@@ -195,7 +195,7 @@ plt.grid(True)
 plt.show()
 ```
 
-En este gráfico, cada punto representa un estado cuántico, y los colores indican el grupo al que pertenece cada estado según el algoritmo k-means. Los centroides de los grupos están marcados con una 'X' roja, indicando el centro de cada grupo identificado. Este ejemplo es un caso de aprendizaje no supervisado porque no se utilizan etiquetas predefinidas para guiar el proceso de agrupamiento. En lugar de ello, el algoritmo identifica patrones y similitudes inherentes en los datos para agruparlos en categorías significativas. Este enfoque es particularmente útil en situaciones donde las etiquetas no están disponibles o son difíciles de definir, permitiendo a los investigadores descubrir estructuras ocultas en los datos que podrían no ser evidentes a simple vista. Ojo, en este ejemplo se fijó el numero de clústers del algoritmo `KMeans` de antemano en 3. Este es un hiper-parámetro del algoritmo, pero suponemos que teníamos alguna información acerca del número de estados cuánticos posibles.
+En este gráfico, cada punto representa un estado cuántico, y los colores indican el grupo al que pertenece cada estado según el algoritmo k-means. Los centroides de los grupos están marcados con una 'X' roja, indicando el centro de cada grupo identificado. Este ejemplo es un caso de aprendizaje no supervisado porque no se utilizan etiquetas predefinidas para guiar el proceso de agrupamiento. En lugar de ello, el algoritmo identifica patrones y similitudes inherentes en los datos para agruparlos en categorías significativas. Este enfoque es particularmente útil en situaciones donde las etiquetas no están disponibles o son difíciles de definir, permitiendo a los investigadores descubrir estructuras ocultas en los datos que podrían no ser evidentes a simple vista. Ojo, en este ejemplo se fijó el numero de clústers del algoritmo `KMeans` de antemano en 3. Este es un hiper-parámetro del algoritmo, pero suponemos que teníamos alguna información acerca del número de estados posibles.
 
 ### Ejemplo de Aprendizaje por Refuerzo: Control de un Péndulo Simple
 
