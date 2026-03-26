@@ -30,9 +30,44 @@ Finalmente, el libro concluye con una exploración de operadores neuronales, un 
 
 Este libro de apuntes no solo pretende ser una guía académica, sino también una invitación a explorar un campo en rápida evolución que está redefiniendo los límites de lo posible en la ciencia y la ingeniería. A través de estos módulos, esperamos equipar a los estudiantes con las herramientas y el conocimiento necesarios para contribuir al avance de esta emocionante intersección entre la física y la inteligencia artificial.
 
-
 ## Índice
 
 ```{tableofcontents}
 :depth: 4
 ```
+
+## Cronograma tentativo
+
+Semana 1
+
+- Clases 1 y 2: Introducción al Aprendizaje automático profundo en PyTorch
+
+Semana 2
+
+- Clases 3 y 4: Introducción al aprendizaje profundo basado en la física
+
+Semana 3
+
+- Clases 5 y 6: Redes neuronales informadas en la física (PINNs)
+
+Semana 4
+
+- Clases 7 y 8: Física Diferenciable (FD)
+
+Semana 5
+
+- Clase 8 y 10: Modelos probabilísticos (VAE, MDN)
+
+Semana 6
+
+- Clase 11 y 12: Modelos probabilísticos (GAN, NF)
+
+Semana 7
+
+- Clase 13 y 14: De simulaciones a inferencia (Bayesiano y SBI)
+
+Semana 8
+
+- Clase 15 y 16: Operadores neuronales (DeepONets y FNO)
+
+
