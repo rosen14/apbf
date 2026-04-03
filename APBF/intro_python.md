@@ -317,6 +317,8 @@ PyTorch se distingue por varias características que lo hacen atractivo para el 
 
 - **Interactividad y Flexibilidad**: A diferencia de otras bibliotecas de aprendizaje profundo, PyTorch permite definir modelos de manera dinámica, lo que facilita la depuración y experimentación.
 
+Para más detalle en cómo utilizar `PyTorch`, avanzar a la [Guia introductoria a Pytorch](./intro_pytorch.ipynb).
+
 ### Flujo de Trabajo Típico
 
 El flujo de trabajo en PyTorch para construir y entrenar un modelo de aprendizaje profundo generalmente sigue estos pasos:
