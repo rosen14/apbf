@@ -298,10 +298,10 @@ En este ejemplo, hemos implementado un agente de aprendizaje por refuerzo que ap
 
 La función de costo cuantifica el grado de discrepancia en las predicciones del modelo propuesto y la información disponible (ya sea en forma de datos observados, etiquetas conocidas, etc.).
 
-Una función de costo $\mathcal{L}(\theta)$ es una función escalar que depende de los parámetros del modelo $\theta$. El entrenamiento de un modelo de aprendizaje automático consiste en resolver un problema de optimización, típicamente no lineal y de dimensionalidad alta, en la que se busca minimizar dicha función. Es decir, se busca $\theta^{*}$ tal que
+Una función de costo $\mathcal{L}(w)$ es una función escalar que depende de los parámetros del modelo $w$. El entrenamiento de un modelo de aprendizaje automático consiste en resolver un problema de optimización, típicamente no lineal y de dimensionalidad alta, en la que se busca minimizar dicha función. Es decir, se busca $w^{*}$ tal que
 
 $$
-\theta^{*} = \text{arg min}_{\theta} \mathcal{L}(\theta)
+w^{*} = \text{arg min}_{w} \mathcal{L}(w)
 $$
 
 La elección de la función de costo resulta un elemento central del diseño de cualquier algoritmo de aprendizaje, ya que define qué significa "aprender" en el contexto del problema considerado. 
@@ -438,10 +438,10 @@ A continuación describiré algunos de los optimizadores más utilizados al mome
 El descenso por gradiente estocástico es la base conceptual de la mayoría de los optimizadores modernos. En su forma más simple, actualiza los parámetros en la dirección opuesta al gradiente de la función de costo, estimado sobre un mini-batch de datos:
 
 $$
-\theta_{t+1} = \theta_t - \eta \nabla_\theta \mathcal{L}_t(\theta_t),
+w_{t+1} = w_t - \eta \nabla_w \mathcal{L}_t(w_t),
 $$
 
-donde $\eta > 0$ es la tasa de aprendizaje y $\nabla_\theta \mathcal{L}_t$ representa el gradiente calculado en el paso $t$.
+donde $\eta > 0$ es la tasa de aprendizaje y $\nabla_w \mathcal{L}_t$ representa el gradiente calculado en el paso $t$.
 
 SGD es simple, eficiente en memoria y presenta buenas propiedades de generalización. Sin embargo, puede converger lentamente y ser sensible a la elección de la tasa de aprendizaje, especialmente en funciones de costo mal condicionadas.
 
@@ -450,11 +450,11 @@ SGD es simple, eficiente en memoria y presenta buenas propiedades de generalizac
 El método de momento introduce una variable auxiliar $v_t$ que acumula una media exponencial de los gradientes pasados, reduciendo oscilaciones y acelerando la convergencia en direcciones consistentes:
 
 $$
-v_t = \mu v_{t-1} + \nabla_\theta \mathcal{L}_t(\theta_t),
+v_{t+1} = \mu v_{t} + \eta \nabla_w \mathcal{L}(w_t),
 $$
 
 $$
-\theta_{t+1} = \theta_t - \eta v_t,
+w_{t+1} = w_t - v_{t+1},
 $$
 
 donde $\mu \in [0,1)$ es el coeficiente de momento.
@@ -466,13 +466,13 @@ Este enfoque puede interpretarse como una analogía física, en la que los pará
 RMSProp es un optimizador adaptativo que ajusta de forma automática la tasa de aprendizaje de cada parámetro en función de la magnitud reciente de sus gradientes. Mantiene una media móvil del cuadrado del gradiente:
 
 $$
-s_t = \rho s_{t-1} + (1-\rho)\left(\nabla_\theta \mathcal{L}_t(\theta_t)\right)^2,
+s_t = \rho s_{t-1} + (1-\rho)\left(\nabla_w \mathcal{L}_t(w_t)\right)^2,
 $$
 
 y actualiza los parámetros según
 
 $$
-\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{s_t + \epsilon}} \nabla_\theta \mathcal{L}_t(\theta_t),
+w_{t+1} = w_t - \frac{\eta}{\sqrt{s_t + \epsilon}} \nabla_w \mathcal{L}_t(w_t),
 $$
 
 donde $\rho \in [0,1)$ es el factor de decaimiento y $\epsilon$ es un término pequeño para garantizar estabilidad numérica.
@@ -484,11 +484,11 @@ RMSProp es especialmente útil en problemas no estacionarios y cuando las escala
 Adam combina las ideas de momento y escalado adaptativo del gradiente. Mantiene estimaciones de primer y segundo orden del gradiente:
 
 $$
-m_t = \beta_1 m_{t-1} + (1-\beta_1)\nabla_\theta \mathcal{L}_t(\theta_t),
+m_t = \beta_1 m_{t-1} + (1-\beta_1)\nabla_w \mathcal{L}_t(w_t),
 $$
 
 $$
-v_t = \beta_2 v_{t-1} + (1-\beta_2)\left(\nabla_\theta \mathcal{L}_t(\theta_t)\right)^2,
+v_t = \beta_2 v_{t-1} + (1-\beta_2)\left(\nabla_w \mathcal{L}_t(w_t)\right)^2,
 $$
 
 junto con correcciones por sesgo debidas a la inicialización:
@@ -501,7 +501,7 @@ $$
 La actualización final de los parámetros es
 
 $$
-\theta_{t+1} = \theta_t - \eta \frac{\hat{m}_t}{\sqrt{\hat{v}_t + \epsilon}}.
+w_{t+1} = w_t - \eta \frac{\hat{m}_t}{\sqrt{\hat{v}_t + \epsilon}}.
 $$
 
 Adam ofrece una convergencia rápida y estable en una amplia gama de problemas, lo que explica su uso generalizado como optimizador por defecto en aprendizaje profundo. No obstante, en algunos casos puede mostrar peores propiedades de generalización que SGD con momento.
