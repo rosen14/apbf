@@ -42,85 +42,116 @@ El término "profundo" en aprendizaje profundo se refiere a la presencia de múl
 
 En lo que continúa revisaremos algunos de los conceptos para mí más importantes que permitieron avanzar del aprendizaje automático al aprendizaje profundo y que nos serán de utilidad para entender los modelos que plantearemos más adelante.
 
-### Diferenciación Automática y retropropagación
+### Diferenciación Automática y Retropropagación
 
-Como he mencionado anteriormente, el entrenamiento de modelos de aprendizaje automático profundo se basa en el cálculo eficiente del gradiente de la función (escalar) de costo $\mathcal{L}(\theta)$ con respecto a un gran número de parámetros $\theta$, i.e. $\theta \in \mathbb{R}^n$ con $n$ grande. Los algoritmos de optimización requieren el gradiente $\nabla_{\theta}\mathcal{L}$ para actualizar los parámetros de forma iterativa, pero el cálculo manual de estos gradientes resulta impracticable para modelos reales. 
 
-La **diferenciación automática** (Autograd) {cite}`baydin2018automatic` es una técnica computacional que permite calcular derivadas exactas (hasta la precisión de la máquina) de funciones definidas programáticamente de manera eficiente y sistemática. A diferencia de la diferenciación simbólica o de la numérica, la automática o autograd se basa en la aplicación repetida de la regla de la cadena sobre operaciones elementales.
+Como se mencionó anteriormente, el entrenamiento de modelos de aprendizaje profundo se fundamenta en el cálculo eficiente del gradiente de la función de costo $\mathcal{L}(\theta)$ con respecto a los parámetros de la red $\theta \in \mathbb{R}^n$, siendo $n$ potencialmente muy grande (millones o miles de millones de parámetros en modelos contemporáneos). Los métodos de optimización basados en gradientes, como descenso de gradiente estocástico o sus variantes adaptativas, requieren evaluar $\nabla_{\theta}\mathcal{L}$ de forma iterativa durante el entrenamiento.
 
-La base del Autograd es el grafo computacional. Cualquier función implementada como una secuencia de operaciones elementales (suma, producto, exponencial, etc.) puede representarse como un grafo dirigido acíclico donde los nodos representan operaciones o variables intermedias y las aristas representan dependencias funcionales. Por ejemplo, $f(x,y)=xy + sin(x)$ puede considerarse como $f(a,b)=z=a+b$ con $a=xy$ y $b=sin(x)$ y el grafo puede ser representado como se muestra en la siguiente figura.
+El cálculo manual de estos gradientes utilizando técnicas analíticas sería completamente impracticable. Por otra parte, la diferenciación numérica mediante aproximaciones por diferencias finitas, es decir, $\frac{\partial \mathcal{L}}{\partial \theta_i} \approx \frac{\mathcal{L}(\theta + h\mathbf{e}_i) - \mathcal{L}(\theta)}{h}$, requeriría una evaluación completa de la función de costo para cada parámetro, resultando en una complejidad computacional prohibitiva. La diferenciación automática surge como la solución elegante a este dilema, permitiendo calcular gradientes exactos (hasta la precisión de la máquina) de manera eficiente y sistemática.
+
+#### El grafo computacional
+
+La piedra angular de la diferenciación automática es el concepto del grafo computacional, también conocido como grafo de cálculo o computational graph. Cualquier función implementada como una secuencia de operaciones elementales puede descomponerse y representarse como un grafo dirigido acíclico (DAG). En este grafo, los nodos representan operaciones elementales (adición, multiplicación, exponencial, seno, etc.) o variables intermedias, mientras que las aristas representan dependencias funcionales entre estas operaciones.
+
+Para concretar esta idea, consideremos la función $f(x,y) = xy + \sin(x)$. Podemos descomponerla como:
+
+$$a = x \cdot y, \quad b = \sin(x), \quad z = a + b$$
+
+donde $a$ y $b$ son variables intermedias. El grafo computacional que representa estas operaciones se muestra en la siguiente figura, donde se observa claramente la estructura de dependencias.
 
 ![](./figs/graph.png)
 
-Si aplicamos la regla de la cadena para una variable $t$ (que puede ser $x$ o $y$), podemos escribir lo siguiente
+La importancia del grafo computacional radica en que codifica completamente cómo se propagan las derivadas parciales a través de las operaciones. Una vez construido, es posible aplicar métodos automáticos para calcular derivadas sin necesidad de simbolismo algebraico.
 
-$$
-\frac{\partial z}{\partial t} = \frac{\partial a}{\partial t} + \frac{\partial b}{\partial t}
-$$
+#### La regla de la cadena y sus interpretaciones
 
-con 
+El núcleo matemático de la diferenciación automática descansa en la regla de la cadena multivariada. Dada una composición de funciones $z = h(g(f(x)))$, la regla de la cadena establece que:
 
-$$
-\frac{\partial b}{\partial t} = \cos(x) \frac{\partial x}{\partial t} 
-$$
+$$\frac{\partial z}{\partial x} = \frac{\partial z}{\partial u} \cdot \frac{\partial u}{\partial v} \cdot \frac{\partial v}{\partial x}$$
 
-y
+donde $u = g(f(x))$ y $v = f(x)$ son variables intermedias. Esta regla es fundamental para relacionar el cambio en la salida final con cambios en las variables de entrada a través de variables intermedias.
 
-$$
-\frac{\partial a}{\partial t} = x\frac{\partial y}{\partial t} + y\frac{\partial x}{\partial t}
-$$
+En el contexto del grafo computacional, la aplicación de la regla de la cadena puede realizarse de dos formas conceptualmente distintas, conocidas como modo directo (forward mode) y modo inverso (reverse mode o backpropagation). Ambos métodos son matemáticamente equivalentes pero diferieren significativamente en eficiencia computacional según el contexto del problema.
 
-Si escribimos estas expresiones en un programita que involucra variables diferenciales $(dx, dy)$ nos queda
+En el modo directo, aplicamos la regla de la cadena progresivamente desde las variables de entrada hacia la salida. Consideremos nuevamente el ejemplo anterior. Si queremos calcular cómo cambia $z$ con respecto a $x$, introducimos las variaciones $dx$ y $dy$ en las entradas, propagándolas hacia adelante:
+
+$$da = y \cdot dx + x \cdot dy$$
+$$db = \cos(x) \cdot dx$$
+$$dz = da + db$$
+
+Estas ecuaciones pueden implementarse directamente en código:
 
 ```python
-da = y * dx + x*dy
+# Modo directo: dx=1, dy=0 para derivada respecto a x
+dx, dy = 1.0, 0.0
+da = y * dx + x * dy
 db = cos(x) * dx
 dz = da + db
+# dz contiene ahora la derivada parcial ∂z/∂x
 ```
 
-Si queremos saber la derivada para $x$ basta con remplazar $dx=1$ y $dy=0$ y viceversa para la derivada con respecto a $y$.  Así empiezan a aparecer unas reglas básicas programáticas, como por ejemplo, si $c=a+b$ (suma) entonces $dc=da+db$. Si $c=a*b$, entonces $dc=b*da + a*db$, y si $c=sin(a)$ entonces $dc=cos(a)*da$. De la misma manera, podemos armarnos de las reglas para la resta, la división, la exponenciación, el coseno y la tangente (entre otras más).
+Si en cambio necesitamos la derivada respecto a $y$, simplemente ejecutamos nuevamente con $dx=0$ y $dy=1$.
 
-La diferenciación automática se puede hacer de dos maneras, hacia adelante o hacia atrás (retropropagación) pero a continuación daré argumentos de por qué se utiliza la diferenciación hacia atrás en aprendizaje profundo. Hacia adelante sería: El programa lee $x$ y $dx$, $y$ y $dy$. En este ejemplo $a=x*y$, por lo que con las reglas que obtuvimos $da=y*dx + x*dy$. Como $b=sin(x)$, por la regla que obtuvimos $db=cos(x) +dx$. Finalmente, como $z=a+b$, por la regla de la suma $dz=da+db$. De esta manera, si $dx=1$ y $dy=0$, se obtiene la derivada de la función $z$ con respecto a $x$ computacionalmente. A pesar de que la diferenciación automática hacia adelante resulta muy fácil de implementar y entender, presenta una gran desventaja computacional. Para CADA variable sobre la que queremos calcular el gradiente, debemos correr el programa que realiza toda la computación desde el inicio hasta el fin. Esto claramente representa un problema gigante para las redes neuronales profundas (que pueden presentar más de millones de parámetros).
+La ventaja del modo directo es su claridad conceptual: las operaciones elementales se procesan secuencialmente desde la entrada hacia la salida. Sin embargo, su desventaja es lo que lo vuelve menos útil para aprendizaje profundo: **para calcular el gradiente completo con respecto a $n$ parámetros diferentes, es necesario ejecutar la propagación hacia adelante $n$ veces**, una por cada parámetro. En una red neuronal con millones de parámetros, esto termina resultando computacionalmente prohibitivo.
 
-La solución a este problema es la diferenciación automática hacia atrás o bien la retropropagación del gradiente y se basa en revertir la regla de la cadena. En este caso, en vez de preguntarnos cómo varía la salida en función de las variables de entrada, nos preguntamos qué variables de salida pueden ser afectadas por una variable entrada dada. Así como usamos $t$ para expresar una variable genérica de entrada anteriormente, usando $s$ para una variable genérica de salida se puede escribir 
+En el modo inverso se invierte el flujo de computación. En lugar de preguntar "¿cómo afectan los cambios en $x$ a la salida $z$?", nos preguntamos "¿cuál es el impacto de la salida $z$ sobre cada elemento intermedio?". Formalmente, denotamos con $\bar{v} = \frac{\partial z}{\partial v}$ la derivada parcial de la salida final con respecto a cualquier variable intermedia $v$.
 
-$$
-\frac{\partial s}{\partial b} = \frac{\partial z}{\partial b}\frac{\partial s}{\partial z} = \frac{\partial s}{\partial z}
-$$
+Para nuestro ejemplo, comenzamos fijando $\bar{z} = 1$ (puesto que $\frac{\partial z}{\partial z} = 1$) y retropropagamos:
 
-$$
-\frac{\partial s}{\partial a} = \frac{\partial z}{\partial a}\frac{\partial s}{\partial z} = \frac{\partial s}{\partial z}
-$$
+$$\bar{a} = \frac{\partial z}{\partial a} = \bar{z} \cdot \frac{\partial z}{\partial a} = \bar{z}$$
+$$\bar{b} = \frac{\partial z}{\partial b} = \bar{z} \cdot \frac{\partial z}{\partial b} = \bar{z}$$
 
-$$
-\frac{\partial s}{\partial y} = \frac{\partial a}{\partial y}\frac{\partial s}{\partial a} = x\frac{\partial s}{\partial a}
-$$
+Luego, continuamos hacia atrás en el grafo:
 
-$$
-\frac{\partial s}{\partial x} = \frac{\partial a}{\partial x}\frac{\partial s}{\partial a} + \frac{\partial b}{\partial x}\frac{\partial s}{\partial b}=y\frac{\partial s}{\partial a} + cos(x)\frac{\partial s}{\partial b}=(y+cos(x))\frac{\partial s}{\partial z}
-$$
+$$\bar{y} = \frac{\partial z}{\partial y} = \frac{\partial a}{\partial y} \cdot \bar{a} = x \cdot \bar{a}$$
+$$\bar{x} = \frac{\partial z}{\partial x} = \frac{\partial a}{\partial x} \cdot \bar{a} + \frac{\partial b}{\partial x} \cdot \bar{b} = y \cdot \bar{a} + \cos(x) \cdot \bar{b}$$
 
-Escribiendo lo anterior en un programita, esto nos queda
+En código:
 
 ```python
-gb = gz
-ga = gz
-gy = x * ga
-gx = y * ga + cos(x) * gb
+# Modo inverso: retropropagación
+bar_z = 1.0
+bar_a = bar_z
+bar_b = bar_z
+bar_y = x * bar_a
+bar_x = y * bar_a + cos(x) * bar_b
+# bar_x y bar_y contienen ahora las derivadas parciales completas
 ```
 
-Sustituyendo $s=z$ sería equivalente a $gz=1$, podemos ver entonces que para calcular ambos gradientes $\frac{\partial z}{\partial x}$ y $\frac{\partial z}{\partial y}$ debemos ejecutar el programa **una sola vez**.
+**La ventaja decisiva del modo inverso es que una sola pasada hacia atrás a través del grafo computacional produce todas las derivadas parciales**. Sin importar cuántos parámetros tenga la red $(n)$, los gradientes se calculan en una única pasada.
 
+Para clarificar la ventaja del modo inverso, considérese un programa con $m$ operaciones elementales y $n$ variables de entrada. El costo computacional de cada modo es aproximadamente:
 
-Continuar...
+- **Modo directo**: $\mathcal{O}(n \cdot m)$ — requiere $n$ pasadas, cada una con $m$ operaciones.
+- **Modo inverso**: $\mathcal{O}(m)$ — requiere una única pasada inversa.
+
+En aprendizaje profundo, $n$ (número de parámetros) es tipicamente mucho mayor que $m$ (complejidad de computación individual). Por lo tanto, el modo inverso es exponencialmente más eficiente. Esta es la razón fundamental por la cual la retropropagación se adoptó como el estándar en toda la industria del aprendizaje profundo.
+
+A partir de la aplicación sistemática de la regla de la cadena, se derivan reglas simples pero poderosas para operaciones básicas. Si las variables se relacionan mediante $c = a \circ b$ (donde $\circ$ denota una operación), entonces:
+
+Para suma: $c = a + b \implies \bar{a} = \bar{c}, \quad \bar{b} = \bar{c}$
+
+Para producto: $c = a \cdot b \implies \bar{a} = b \cdot \bar{c}, \quad \bar{b} = a \cdot \bar{c}$
+
+Para funciones escalares: $c = \sin(a) \implies \bar{a} = \cos(a) \cdot \bar{c}$, o más generalmente $c = f(a) \implies \bar{a} = f'(a) \cdot \bar{c}$
+
+Estas reglas, aunque elementales, pueden componerse de manera arbitraria para construir gradientes de funciones extraordinariamente complejas. Esta composición modular es lo que permite que los marcos de trabajo modernos (PyTorch, TensorFlow, JAX) automaticen completamente el cálculo de gradientes.
+
+Los sistemas de diferenciación automática contemporáneos, como los implementados en PyTorch, emplean estrategias sofisticadas para optimizar tanto memoria como tiempo de cómputo. Durante la pasada hacia adelante (forward pass), el sistema registra todas las operaciones realizadas, construyendo implícitamente el grafo computacional. Durante la retropropagación (backward pass), se reversa este orden y se aplican las reglas de derivación para cada operación.
+
+Un aspecto importante es que estos sistemas suelen soportar diferenciación de segundo orden (Hessiano) e incluso de órdenes superiores, aplicando diferenciación automática sobre la misma diferenciación automática. Esto es esencial para métodos de optimización avanzados y análisis de curvatura.
+
+En resumen, la retropropagación del gradiente representa la implementación práctica y eficiente de la diferenciación automática en modo inverso, específicamente adaptada para el entrenamiento de redes neuronales profundas. Al aplicar sistemáticamente la regla de la cadena en sentido inverso a través del grafo computacional, este algoritmo permite calcular los gradientes de la función de costo con respecto a todos los parámetros de la red en una única pasada, independientemente de la complejidad de la arquitectura. Esta capacidad fundamental no solo hace viable el entrenamiento de modelos con millones de parámetros, sino que también establece las bases matemáticas para el aprendizaje automático moderno, permitiendo que las máquinas aprendan representaciones jerárquicas de los datos de manera automática y escalable.
+
+La importancia de la diferenciación automática se extiende de manera crítica al aprendizaje profundo basado en la física, donde las redes neuronales deben satisfacer restricciones derivadas de leyes físicas fundamentales. En las Redes Neuronales Basadas en la Física (PINNs), la capacidad de calcular derivadas exactas de las salidas de la red con respecto a sus entradas permite incorporar ecuaciones diferenciales parciales (PDEs) directamente en la función de costo. Esta integración automática de conocimiento físico no solo mejora la precisión de las predicciones, sino que también garantiza que las soluciones aprendidas respeten las invariantes y conservaciones inherentes a los sistemas físicos, abriendo nuevas posibilidades para la resolución eficiente de problemas complejos en ciencia e ingeniería.
 
 ### Conexiones residuales
 
-A medida que las redes neuronales profundas comenzaron a escalar en número de capas, se observó un fenómeno paradójico. Al incrementar la profundidad del modelo, el desempeño en entrenamiento y validación podía verse afectado negativamente. Aún cuando el modelo más profundo tenía mayor capacidad expresiva que uno más superficial, no se osbervaban mejoras. Y esto no se debía al sobreajuste sino a una dificultad inherente en el proceso de optimización. 
+A medida que las redes neuronales profundas comenzaron a escalar en número de capas, se observó un fenómeno paradójico. Al incrementar la profundidad del modelo, el desempeño en entrenamiento y validación podía verse afectado negativamente. Aún cuando el modelo más profundo tenía mayor capacidad expresiva que uno más superficial, no se observaban mejoras. Y esto no se debía al sobreajuste sino a una dificultad inherente en el proceso de optimización. 
 
 Una de las causas principales de este fenómeno fue la atenuación o explosión del gradiente durante la retropropagación. En redes neuronales muy profundas, los gradientes pueden volverse extremadamente pequeños o grandes al atravesar muchas capas consecutivas, lo que dificulta el ajuste efectivo de los parámetros de las primeras capas. Las primeras ideas para mitigar este problema fueron la normalización de los datos por batches y comenzar con una inicialización adecuada de los pesos del modelo. A pesar de que esto tuvo un efecto positivo sobre el aprendizaje de los modelos profundo, no resultó suficiente para permitir entrenamiento estable de redes extremadamente profundas. 
 
-lo que permitió destrabar este problema fueron las conexiones residuales, que fueron introducidas originalmente en las redes ResNet {cite}`he2015deepresiduallearningimage`. La idea principal consiste en reformular la red en bloques. En lugar de aprender directamente una transformación deseada $H(x)$ de la entrada $x$, cada bloque aprende una función residual $F(x)$ definida como 
+Lo que permitió destrabar este problema fueron las conexiones residuales, que fueron introducidas originalmente en las redes ResNet {cite}`he2015deepresiduallearningimage`. La idea principal consiste en reformular la red en bloques. En lugar de aprender directamente una transformación deseada $H(x)$ de la entrada $x$, cada bloque aprende una función residual $F(x)$ definida como 
 
 $$
 F(x) = H(x) -x,
@@ -145,12 +176,12 @@ $$
 donde $I$ es la identidad. Este término garantiza que, incluso si el gradiente asociado a $F(x)$ se atenúa, existe siempre una contribución directa que preserva la señal del gradiente a lo largo de la red. Como consecuencia, el gradiente se propaga de manera más estable hacia las capas más profundas (es decir, a las primeras capas ya que estamos retropropagando el gradiente).
 
 
-La introducción de conexiones residuales marcó un punto de inflexión en el desarrollo del aprendizaje profundo. Esto condujo a mejoras directas y sustanciales en tareas de visión por computadora, reconocimiento de patrones y modelado de sistemas complejos.  Más allá de su formulación original, el rpincipio residual ha sido adoptado y extendido en múltiples arquitecturas modernas, incluyendo redes densas, transformadores y modelos utilizandos en aprendizajo profundo basado en la física. 
+La introducción de conexiones residuales marcó un punto de inflexión en el desarrollo del aprendizaje profundo. Esto condujo a mejoras directas y sustanciales en tareas de visión por computadora, reconocimiento de patrones y modelado de sistemas complejos. Más allá de su formulación original, el principio residual ha sido adoptado y extendido en múltiples arquitecturas modernas, incluyendo redes densas, transformadores y modelos utilizados en aprendizaje profundo basado en la física. 
 
 
 ### Clasificación de imágenes 
 
-La clasificación de imágenes constitute una de las aplicaciones más representativas y exitosas del aprendizaje profundo {cite}`yu2023`. El problema consiste en asignar a una imagen una etiqueta discreta que describe su contenido, como la presencia de un objeto, un estado físico o una categoría predefinida. Desde un punto de vista formal, una imagen puede interpretarse como una función discreta definida sobre una grilla bidimensional, cuyos valores representan intensidades, colores o magnitudes físicas medidas en el espacio.
+La clasificación de imágenes constituye una de las aplicaciones más representativas y exitosas del aprendizaje profundo {cite}`yu2023`. El problema consiste en asignar a una imagen una etiqueta discreta que describe su contenido, como la presencia de un objeto, un estado físico o una categoría predefinida. Desde un punto de vista formal, una imagen puede interpretarse como una función discreta definida sobre una grilla bidimensional, cuyos valores representan intensidades, colores o magnitudes físicas medidas en el espacio.
 
 Antes de la irrupción del aprendizaje profundo, los métodos de clasificación de imágenes dependían en gran medida de la extracción manual de características, tales como bordes, texturas o descriptores geométricos diseñados específicamente para cada dominio. Estos enfoques requerían un conocimiento experto considerable y presentaban limitaciones importantes al enfrentarse a variaciones complejas en escala, orientación, ruido o condiciones de adquisición.
 
