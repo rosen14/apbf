@@ -327,9 +327,7 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 
-# ---------------------------
 # Dataset de oscilador sintético
-# ---------------------------
 rng = np.random.default_rng(0)
 
 A = 1.0       # amplitud
@@ -366,9 +364,7 @@ y_train_t = torch.from_numpy(y_train)
 t_test_t  = torch.from_numpy(t_test_s)
 y_test_t  = torch.from_numpy(y_test)
 
-# ---------------------------
 # Modelo MLP de regresión
-# ---------------------------
 class MLP(nn.Module):
     def __init__(self):
         super().__init__()
@@ -389,9 +385,7 @@ model = MLP()
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-# ---------------------------
 # Entrenamiento
-# ---------------------------
 batch_size = 128
 epochs = 1500
 
@@ -415,9 +409,8 @@ for epoch in range(1, epochs + 1):
             rmse = torch.sqrt(torch.mean((test_pred - y_test_t) ** 2)).item()
         print(f"Epoch {epoch:4d} | Test RMSE: {rmse:.4f}")
 
-# ---------------------------
 # Visualización
-# ---------------------------
+
 # Curva ordenada en el tiempo para graficar suave
 t_grid = np.linspace(0.0, 10.0, 600, dtype=np.float32).reshape(-1, 1)
 
@@ -483,9 +476,7 @@ x_mean, x_std = x.mean(), x.std() + 1e-8
 x_n = (x - x_mean) / x_std
 x_clean_n = (x_clean - x_mean) / x_std
 
-# ---------------------------
 # Construir dataset de ventanas (secuencias)
-# ---------------------------
 # Usamos una ventana de longitud L para predecir el siguiente punto.
 L = 50  # longitud de contexto
 
@@ -511,9 +502,7 @@ y_train_t = torch.from_numpy(y_train).unsqueeze(-1)  # (N, 1)
 X_test_t  = torch.from_numpy(X_test).unsqueeze(-1)
 y_test_t  = torch.from_numpy(y_test).unsqueeze(-1)
 
-# ---------------------------
 # Modelo recurrente (GRU)
-# ---------------------------
 class GRURegressor(nn.Module):
     def __init__(self, hidden_size=32, num_layers=1):
         super().__init__()
@@ -538,9 +527,7 @@ model = GRURegressor(hidden_size=64)
 criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
-# ---------------------------
 # Entrenamiento
-# ---------------------------
 batch_size = 128
 epochs = 30
 
@@ -566,9 +553,7 @@ for epoch in range(1, epochs + 1):
             rmse = torch.sqrt(torch.mean((pred_test - y_test_t) ** 2)).item()
         print(f"Epoch {epoch:2d} | Test RMSE (norm): {rmse:.4f}")
 
-# ---------------------------
 # Visualización: predicción vs real en el tramo de test
-# ---------------------------
 model.eval()
 with torch.no_grad():
     yhat_test = model(X_test_t).squeeze(-1).numpy()  # normalizado
@@ -695,9 +680,7 @@ with torch.no_grad():
 
 
 
-# ----------------------------
-# Gráfico
-# ----------------------------
+# Graficar
 
 plt.figure()
 plt.scatter(x, y_true, label="Datos")
