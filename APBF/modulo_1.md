@@ -13,6 +13,12 @@ kernelspec:
 
 # Introducción a la inteligencia artificial y al aprendizaje profundo
 
+**Diapositivas teórico**: [semana_01.pdf](./slides/semana_01.pdf)
+
+**Notebook teórico-práctico**: [Semana01_intro_pytorch.ipynb](./teorico_practicos/Semana01_intro_pytorch.ipynb)
+
+**Guía de trabajo práctico**: [Guia_Semana_01_Fundamentos_Python_y_ML.ipynb](./practicos/Guia_Semana_01_Fundamentos_Python_y_ML.ipynb)
+
 ```{contents}
 :local:
 ```

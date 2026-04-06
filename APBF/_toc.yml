@@ -16,5 +16,6 @@ chapters:
   - file: modulo_7
   - file: intro_python
     sections:
-      - file: intro_pytorch
+      - file: teorico_practicos/Semana01_intro_pytorch.ipynb
+  - file: guias
 
