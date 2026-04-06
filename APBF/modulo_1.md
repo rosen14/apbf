@@ -544,12 +544,12 @@ from sklearn.preprocessing import StandardScaler
 
 # Generar datos sintéticos
 X, y = make_moons(n_samples=1000, noise=0.2, random_state=42)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train_orig, X_test_orig, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Escalar los datos
 scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
+X_train = scaler.fit_transform(X_train_orig)
+X_test = scaler.transform(X_test_orig)
 
 # Convertir los datos a tensores de PyTorch
 X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
@@ -611,8 +611,8 @@ with torch.no_grad():
 # Visualizar los resultados
 plt.figure(figsize=(8, 6))
 plt.contourf(xx, yy, Z, alpha=0.3, cmap='viridis')
-plt.scatter(X_test[:, 0], X_test[:, 1], c=y_test, cmap='viridis', marker='o', edgecolor='k', s=50)
-plt.scatter(X_train[:, 0], X_train[:, 1], c=y_train, cmap='viridis', marker='x', s=30, alpha=0.6)
+plt.scatter(X_test_orig[:, 0], X_test_orig[:, 1], c=y_test, cmap='viridis', marker='o', edgecolor='k', s=50)
+plt.scatter(X_train_orig[:, 0], X_train_orig[:, 1], c=y_train, cmap='viridis', marker='x', s=30, alpha=0.6)
 plt.title('Clasificación del Perceptrón Multicapa')
 plt.xlabel('Característica 1')
 plt.ylabel('Característica 2')
