@@ -18,6 +18,159 @@ kernelspec:
 :local:
 ```
 
+## Programación Orientada a Objetos en Python
+
+La programación orientada a objetos (OOP, por sus siglas en inglés) es una forma de organizar código a partir de objetos. Un objeto combina datos y comportamiento: los datos suelen almacenarse en atributos, mientras que el comportamiento se implementa mediante métodos.
+
+En Python, una clase funciona como un molde a partir del cual podemos crear objetos. Por ejemplo, si queremos representar partículas en una simulación, podemos definir una clase que describa qué información guarda cada partícula y qué operaciones puede realizar.
+
+### Clases y objetos
+
+Una clase se define con la palabra clave `class`. Luego, a partir de esa clase, podemos crear objetos concretos.
+
+```{code-cell} ipython3
+class Particula:
+    pass
+
+
+p1 = Particula()
+p2 = Particula()
+
+print(type(p1))
+print(p1 is p2)
+```
+
+En este ejemplo, `Particula` es la clase, mientras que `p1` y `p2` son dos objetos distintos creados a partir de ella.
+
+### Atributos
+
+Los atributos son variables asociadas a un objeto. Permiten guardar información propia de cada instancia.
+
+```{code-cell} ipython3
+class Particula:
+    pass
+
+
+p = Particula()
+p.nombre = "electrón"
+p.carga = -1
+p.masa = 9.11e-31
+
+print(p.nombre)
+print(p.carga)
+print(p.masa)
+```
+
+Aunque Python permite crear atributos de esta manera, normalmente preferimos definirlos dentro de una función especial llamada `__init__`, que se ejecuta automáticamente al crear el objeto.
+
+### La función `__init__`
+
+El método `__init__` sirve para inicializar los atributos de cada objeto. Recibe como primer argumento a `self`, que representa a la instancia que se está creando.
+
+```{code-cell} ipython3
+class Particula:
+    def __init__(self, nombre, carga, masa):
+        self.nombre = nombre
+        self.carga = carga
+        self.masa = masa
+
+
+electron = Particula("electrón", -1, 9.11e-31)
+proton = Particula("protón", 1, 1.67e-27)
+
+print(electron.nombre)
+print(proton.masa)
+```
+
+Cada vez que escribimos `Particula(...)`, Python crea un nuevo objeto y llama automáticamente a `__init__` con los valores que pasamos.
+
+### Métodos
+
+Los métodos son funciones definidas dentro de una clase. Se usan para describir acciones o cálculos asociados a los objetos.
+
+```{code-cell} ipython3
+class Particula:
+    def __init__(self, nombre, carga, masa):
+        self.nombre = nombre
+        self.carga = carga
+        self.masa = masa
+
+    def describir(self):
+        print(f"{self.nombre}: carga = {self.carga}, masa = {self.masa:.2e} kg")
+
+    def es_neutra(self):
+        return self.carga == 0
+
+
+neutron = Particula("neutrón", 0, 1.67e-27)
+neutron.describir()
+print(neutron.es_neutra())
+```
+
+Observá que `self` permite acceder a los atributos del propio objeto. Por ejemplo, dentro del método `describir`, `self.nombre` hace referencia al nombre de esa instancia en particular.
+
+### Representación con `__repr__`
+
+Cuando imprimimos un objeto, Python muestra por defecto una representación poco informativa. Podemos mejorar esto definiendo el método especial `__repr__`.
+
+```{code-cell} ipython3
+class Particula:
+    def __init__(self, nombre, carga, masa):
+        self.nombre = nombre
+        self.carga = carga
+        self.masa = masa
+
+
+p = Particula("muón", -1, 1.88e-28)
+print(p)
+```
+
+La salida indica que existe un objeto de tipo `Particula`, pero no muestra claramente su contenido. Para resolverlo:
+
+```{code-cell} ipython3
+class Particula:
+    def __init__(self, nombre, carga, masa):
+        self.nombre = nombre
+        self.carga = carga
+        self.masa = masa
+
+    def __repr__(self):
+        return f"Particula(nombre={self.nombre!r}, carga={self.carga}, masa={self.masa})"
+
+
+p = Particula("muón", -1, 1.88e-28)
+print(p)
+```
+
+Ahora la representación es mucho más útil, especialmente al inspeccionar objetos en una notebook o durante la depuración.
+
+### Ejemplo completo
+
+El siguiente ejemplo reúne los conceptos principales: clase, atributos, `__init__`, métodos y `__repr__`.
+
+```{code-cell} ipython3
+class Particula:
+    def __init__(self, nombre, carga, masa):
+        self.nombre = nombre
+        self.carga = carga
+        self.masa = masa
+
+    def energia_en_reposo(self):
+        c = 3.0e8
+        return self.masa * c**2
+
+    def __repr__(self):
+        return f"Particula(nombre={self.nombre!r}, carga={self.carga}, masa={self.masa})"
+
+
+electron = Particula("electrón", -1, 9.11e-31)
+
+print(electron)
+print(f"Energía en reposo: {electron.energia_en_reposo():.3e} J")
+```
+
+En muchos problemas científicos, este enfoque resulta útil porque permite representar entidades del problema, como partículas, sensores, mediciones o simulaciones, agrupando en un mismo lugar tanto sus propiedades como las operaciones que les corresponden.
+
 ## Numpy
 
 NumPy (Numerical Python) es una biblioteca fundamental para el cálculo numérico en Python, especialmente relevante para estudiantes de física y disciplinas afines. Proporciona soporte para arrays y matrices multidimensionales, junto con una colección de funciones matemáticas de alto nivel para operar con estos datos. NumPy es esencial para realizar cálculos eficientes y es la base sobre la cual se construyen muchas otras bibliotecas científicas en Python, como SciPy, Pandas y Matplotlib.
@@ -317,7 +470,7 @@ PyTorch se distingue por varias características que lo hacen atractivo para el 
 
 - **Interactividad y Flexibilidad**: A diferencia de otras bibliotecas de aprendizaje profundo, PyTorch permite definir modelos de manera dinámica, lo que facilita la depuración y experimentación.
 
-Para más detalle en cómo utilizar `PyTorch`, avanzar a la [Guia introductoria a Pytorch](./intro_pytorch.ipynb).
+Para más detalle en cómo utilizar `PyTorch`, avanzar a la [Guia introductoria a Pytorch](./teorico_practicos/intro_pytorch.ipynb).
 
 ### Flujo de Trabajo Típico
 
@@ -397,7 +550,6 @@ with torch.no_grad():
     accuracy = (predicted == y_test_tensor).sum().item() / y_test_tensor.size(0)
     print(f"Precisión del modelo: {accuracy:.2f}")
 ```
-
 
 
 
