@@ -24,6 +24,7 @@ La programación orientada a objetos (OOP, por sus siglas en inglés) es una for
 
 En Python, una clase funciona como un molde a partir del cual podemos crear objetos. Por ejemplo, si queremos representar partículas en una simulación, podemos definir una clase que describa qué información guarda cada partícula y qué operaciones puede realizar.
 
+Para una buena introducción a OOP, pueden leer [los apuntes de José-Luis Prieto](http://www.tugurium.com/python/index.php?C=PYTHON.11) que se encuentran en español.
 ### Clases y objetos
 
 Una clase se define con la palabra clave `class`. Luego, a partir de esa clase, podemos crear objetos concretos.
