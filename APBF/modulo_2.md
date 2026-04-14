@@ -16,7 +16,7 @@ kernelspec:
 
 **Notebook teórico-práctico**: [Semana02_DL_autograd.ipynb](./teorico_practicos/Semana02_DL_autograd.ipynb)
 
-**Guía de trabajo práctico**: [Guia_Semana_01_Fundamentos_Python_y_ML.ipynb](./practicos/Guia_Semana_02_Deep_Learning_Autograd.ipynb)
+**Guía de trabajo práctico**: [Guia_Semana_02_Deep_Learning_Autograd.ipynb](./practicos/Guia_Semana_02_Deep_Learning_Autograd.ipynb)
 
 ```{contents}
 :local:

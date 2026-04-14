@@ -17,5 +17,6 @@ chapters:
   - file: intro_python
     sections:
       - file: teorico_practicos/Semana01_intro_pytorch.ipynb
+      - file: teorico_practicos/Semana02_DL_autograd.ipynb
   - file: guias
 
