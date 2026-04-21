@@ -14,7 +14,7 @@ kernelspec:
 
 **Diapositivas teórico**: [Semana_3.pdf](slides/Semana_3.pdf)
 
-**Notebook teórico-práctico**: [Semana03_intro_deepxde.ipynb](./teorico_practicos/Semana03_intro_deepxde.ipynb)
+**Notebooks teórico-práctico**: [Semana03_PINNs.ipynb](./teorico_practicos/Semana03_PINNs.ipynb), [Semana03_intro_deepxde.ipynb](./teorico_practicos/Semana03_intro_deepxde.ipynb)
 
 **Guía de trabajo práctico**: [Guia_Semana_03_PINNs.ipynb](./practicos/Guia_Semana_03_PINNs.ipynb)
 
