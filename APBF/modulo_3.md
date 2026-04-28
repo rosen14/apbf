@@ -12,7 +12,11 @@ kernelspec:
 ---
 # Embebiendo física dentro de redes neuronales
 
-**Diapositivas teórico**: [Semana_3.pdf](slides/Semana_3.pdf)
+**Diapositivas teórico**: 
+
+- [Semana_3.pdf](slides/Semana_3.pdf)
+
+- [Semana_4.pdf](slides/Semana_4.pdf)
 
 **Notebooks teórico-práctico**: 
 - [Semana03_PINNs.ipynb](./teorico_practicos/Semana03_PINNs.ipynb)
@@ -23,7 +27,15 @@ kernelspec:
 
 - [Semana03_pinn_parametrico.ipynb](./teorico_practicos/Semana03_pinn_parametrico.ipynb)
 
-**Guía de trabajo práctico**: [Guia_Semana_03_PINNs.ipynb](./practicos/Guia_Semana_03_PINNs.ipynb)
+- [Semana_04_billar_FD.ipynb](./teorico_practicos/Semana_04_billar_FD.ipynb)
+
+- [Semana_04_pendulo_FD.ipynb](./teorico_practicos/Semana_04_pendulo_FD.ipynb)
+
+- [Semana_04_adversarial_FD.ipynb](./teorico_practicos/Semana_04_adversarial_FD.ipynb)
+
+**Guía de trabajo práctico**: 
+
+- [Guia_Semana_03_PINNs.ipynb](./practicos/Guia_Semana_03_PINNs.ipynb)
 
 
 ```{contents}
