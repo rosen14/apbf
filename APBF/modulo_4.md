@@ -41,14 +41,14 @@ Desde una perspectiva moderna, muchos de estos modelos se implementan mediante r
 
 El límite inferior de la evidencia (ELBO, del inglés *evidence lower bound*) es una cantidad importante que permite el entrenamiento de modelos probabilísticos y que veremos en detalle a continuación. 
 
-En un modelo de variable latente, suponemos que nuestros dato observado $x$ es una realización de una variable aleatoria $X$. Más aún, pensamos que existe otra variable aleatoria $Z$ cuya probabilidad de distribución conjunta está determinada por $p(X,Z;\theta)$, en donde $\theta$ son los parámetros que parametrizan la distribución. Desafortunadamente, nuestros datos medidos u observados son sólo una realización de $X$ y no de $Z$, por lo que $Z$ permanece no observada o latente. 
+En un modelo de variable latente, suponemos que nuestros dato observado $x$ es una realización de una variable aleatoria $X$. Más aún, pensamos que existe otra variable aleatoria $Z$ cuya probabilidad de distribución conjunta está determinada por $p_\theta(X,Z)$, en donde $\theta$ son los parámetros que parametrizan la distribución. Desafortunadamente, nuestros datos medidos u observados son sólo una realización de $X$ y no de $Z$, por lo que $Z$ permanece no observada o latente. 
 
-Supongamos que queremos calcular la distribución de probabilidad posterior $p(Z|X;\theta)$ dado algún valor fijo de $\theta$. Es decir, cuál es la probabilidad de observar $Z=z$ dado que se observó $X=x$ para todo valor de $z$ y $x$. Este problema se puede plantear utilizando lo que se conoce como *inferencia variacional* y que describiremos en breves. 
+Supongamos que queremos calcular la distribución de probabilidad posterior $p_\theta(z|x)$ dado algún valor fijo de $\theta$. Es decir, cuál es la probabilidad de observar $Z=z$ dado que se observó $X=x$ para todo valor de $z$ y $x$. Este problema se puede plantear utilizando lo que se conoce como *inferencia variacional* y que describiremos en breves. 
 
 Ahora supongamos que no conocemos $\theta$, pero queremos encontrar el estimador de máxima verosimilitud de $\theta$, i.e. $\text{argmax}_{\theta} l(\theta)$, en donde $l(\theta)$ es la función de log-verosimilitud, definida como
 
 $$
-l(\theta) := \log (p(x;\theta)) = \log \int_z p(x,z;\theta)dz.
+l(\theta) := \log (p_\theta(x)) = \log \int_z p_\theta(x,z)dz.
 $$
 Este problema se puede plantear utilizando la *maximicación del valor esperado* o esperanza. 
 
@@ -57,68 +57,68 @@ Tanto la inferencia variacional como la maximización del valor esperado se basa
 Para entender ELBO hay que primero definir qué es la evidencia. La *evidencia* es el nombre que se le da a la función de verosimilitud evaluada en un vector de parámetros $\theta$ fijo. Esto se denota poniendo a $\theta$ del lado derecho del símbolo $;$ en la expresión
 
 $$
-\text{evidencia}:= \log p(x;\theta).
+\text{evidencia}:= \log p_\theta(x).
 $$
 
-Intuitivamente, si elegimos el modelo correcto para $p$ y $\theta$, esperaríamos que la probabilidad marginal de observar los datos $x$ que observamos sea muy alta. Por lo tanto, un valor alto para $\log p(x;\theta)$ indica de cierta manera que estamos en la dirección correcta al haber seleccionado el modelo $p$ y los parámetros $\theta$ para estos datos. Es decir, que esta cantidad es una "evidencia" que hemos elegido el modelo correcto para los datos.
+Intuitivamente, si elegimos el modelo correcto para $p$ y $\theta$, esperaríamos que la probabilidad marginal de observar los datos $x$ que observamos sea muy alta. Por lo tanto, un valor alto para $\log p_\theta(x)$ indica de cierta manera que estamos en la dirección correcta al haber seleccionado el modelo $p$ y los parámetros $\theta$ para estos datos. Es decir, que esta cantidad es una "evidencia" que hemos elegido el modelo correcto para los datos.
 
-Ahora supongamos que $Z$ sigue una distribución denotada por $q$. Utilizando el teorema de Bayes {cite}`wiki:Bayes` podemos escribir a la probabilidad conjunta $p(x,z;\theta)=p(x|z;\theta)q(z)$. El límite inferior para la evidencia no es más que
+Ahora supongamos que $Z$ sigue una distribución condicionada a los datos observados denotada por $q_\phi(z|x)$, parametrizada por $\phi$. Utilizamos un truco matemático para introducir esta cantidad en la forma integral de la marginalización de $\log p_\theta(x)$. Como $\frac{q_\phi(z|x)}{q_\phi(z|x)}=1$, podemos escribir:
 
 $$
 \begin{align}
-\log p(x;\theta)
-&= \log \int p(x,z;\theta)\,dz \\
-&= \log \int q(z)\,\frac{p(x,z;\theta)}{q(z)}\,dz \\
-&= \log \mathbb{E}_{Z\sim q}
+\log p_\theta(x)
+&= \log \int p_\theta(x,z)\,dz \\
+&= \log \int q_\phi(z|x)\,\frac{p_\theta(x,z)}{q_\phi(z|x)}\,dz \\
+&= \log \mathbb{E}_{z\sim q(.|x)}
 \left[
-\frac{p(x,Z;\theta)}{q(Z)}
+\frac{p_\theta(x,z)}{q_\phi(z|x)}
 \right] \\
-&\ge \mathbb{E}_{Z\sim q}
+&\ge \mathbb{E}_{z\sim q_\phi(z|x)}
 \left[\log 
-\frac{p(x,Z;\theta)}{q(Z)}
-\right] =\mathbb{E}_{Z\sim q}
+\frac{p_\theta(x,z)}{q_\phi(z|x)}
+\right] =\mathbb{E}_{z\sim q_\phi(z|x)}
 \left[
-\log p(x,Z;\theta) - \log q(Z)
+\log p_\theta(x,z) - \log q_\phi(z|x)
 \right],
 \end{align}
 $$
-en donde para pasar a la desigualdad hemos utilizado la desigualdad de Jensen {cite}`wiki:jensen`. Definimos entonces 
+en donde para pasar a la desigualdad hemos utilizado la desigualdad de Jensen {cite}`wiki:jensen`. Definimos entonces la cota inferior para la evidencia (*Evidence Lower Bound*) a
 
 $$
 ELBO := \left[\log
-\frac{p(x,Z;\theta)}{q(Z)}
-\right].
+\frac{p_\theta(x,z)}{q_\phi(z|x)}
+\right],
 $$
 
-Resulta que la diferencia entre la evidencia y el ELBO es exactamente la divergencia de Kullback-Leibler (KL) entre $p(z|x;\theta)$ y $q(z)$! Esto se puede probar partiendo desde la definición de la divergencia de Kullback-Leibler:
+ya que acabamos de probar que es una cota inferior a la evidencia. Resulta que la diferencia entre la evidencia y el ELBO es exactamente la divergencia de Kullback-Leibler (KL) entre $p_\theta(z|x)$ y $q_\phi(z|x)$! Esto se puede probar partiendo desde la definición de la divergencia de Kullback-Leibler de estas distribuciones:
 
 $$
 \begin{align}
-KL(q(z)||p(z|x;\theta)) :&= \mathbb E_{Z \sim q}\left[\log \frac{q(Z)}{p(Z|x;\theta)}\right] \\
-& = \mathbb E_{Z \sim q}\left[\log q(Z)\right] - \mathbb E_{Z \sim q}\left[\log p(Z|x;\theta)\right] \\
-& = \mathbb E_{Z \sim q}\left[\log q(Z)\right] - \mathbb E_{Z \sim q}\left[\log \frac{p(x,Z;\theta)}{p(x;\theta)}\right] \\
-& = \mathbb E_{Z \sim q}\left[\log q(Z)\right] - \mathbb E_{Z \sim q}\left[\log p(x,Z;\theta)\right] + \mathbb E_{Z \sim q}\left[\log p(x;\theta)\right] \\
-& = \log p(x;\theta) - \mathbb E_{Z \sim q}\left[\log\frac{ p(x,Z;\theta)}{ q(Z)}\right] \\
+D_{KL}(q_\phi(z|x)||p_\theta(z|x)) :&= \mathbb E_{z\sim q_\phi(z|x)}\left[\log \frac{q_\phi(z|x)}{p_\theta(z|x)}\right] \\
+& = \mathbb E_{z\sim q_\phi(z|x)}\left[\log q_\phi(z|x)\right] - \mathbb E_{z\sim q_\phi(z|x)}\left[\log p_\theta(z|x)\right] \\
+& = \mathbb E_{z\sim q_\phi(z|x)}\left[\log q_\phi(z|x)\right] - \mathbb E_{z\sim q_\phi(z|x)}\left[\log \frac{p_\theta(x,z)}{p_\theta(x)}\right] \\
+& = \mathbb E_{z\sim q_\phi(z|x)}\left[\log q_\phi(z|x)\right] - \mathbb E_{z\sim q_\phi(z|x)}\left[\log p_\theta(x,z)\right] + \mathbb E_{z\sim q_\phi(z|x)}\left[\log p_\theta(x)\right] \\
+& = \log p_\theta(x) - \mathbb E_{z\sim q_\phi(z|x)}\left[\log\frac{ p_\theta(x,z)}{ q_\phi(z|x)}\right] \\
 & = \text{evidencia} - ELBO.
 \end{align}
 $$
 
-Esta resulta una identidad clave, ya que ahora podemos decir con exactitud que la evidencia es la suma del ELBO + la KL. Cuando el objetivo es maximizar la evidencia, resulta factible entonces maximizar el ELBO y de esta manera la KL va a medir cuán lejos está la aproximación $q(z)$ de la verdadera probabilidad posterior. Además vemos que Maximizar el ELBO equivale a minimizar la KL.
+Esta resulta una identidad clave, ya que ahora podemos decir con exactitud que la evidencia es la suma del ELBO + la divergencia de KL. Cuando el objetivo es maximizar la evidencia, resulta factible entonces maximizar el ELBO y de esta manera la divergencia de KL va a medir cuán lejos está la aproximación $q(z)$ de la verdadera probabilidad posterior. Además vemos que Maximizar el ELBO equivale a minimizar la divergencia de KL.
 
 ### Inferencia Variacional
 
-La inferencia variacional sirve para estimar una distribución posterior cuando calcularla explícitamente resulta inviable. Como habíamos mencionado, queremos calcular $P(Z|X)$, para $Z$ variable latente y $X$ variable observada. Idealmente, si conociesemos todo,
+La inferencia variacional sirve para estimar una distribución posterior cuando calcularla explícitamente resulta inviable. Como habíamos mencionado, queremos calcular $P(Z|X)$, para $Z$ variable latente y $X$ variable observada. Idealmente, si conociesemos todos los términos, debido al Teorema de Bayes,
 
 $$
 p(z|x)=\frac{p(x|z)p(z)}{p(x)},
 $$
 
-pero el problema usual es que el denominador $p(x)$ no tiene una forma cerrada. La inferencia variacional intenta encontrar otra distribución $q(z)$ que se asemeja "lo más posible" a $p(z|x)$. Para esto, utiliza a la divergencia de Kullback-Leibler como una medida de "cercanía" entre dos distribuciones. Por lo tanto en la inferencia variacional se intenta encontrar 
+pero el problema usual es que el denominador $p(x)$ no tiene una forma cerrada. La inferencia variacional intenta encontrar otra distribución $q(z|x)$ que se asemeja "lo más posible" a $p(z|x)$. Para esto, utiliza a la divergencia de Kullback-Leibler como una medida de "cercanía" entre dos distribuciones. Por lo tanto en la inferencia variacional se intenta encontrar 
 
 $$
-\hat q := \text{argmin}_q KL(q(z)||p(z|x))
+\hat q := \text{argmin}_q D_{KL}(q(z|x)||p(z|x))
 $$
-y luego devuelve $\hat q (z)$ como la aproximación a la distribución posterior $p(z|x)$. Por ende, en la inferencia variacional se minimiza la KL, lo que acabamos de ver que es equivalente a maximizar el ELBO.
+y luego devuelve $\hat q (z|x)$ como la aproximación a la distribución posterior $p(z|x)$. Por ende, en la inferencia variacional se minimiza la divergencia de KL, lo que acabamos de ver que es equivalente a maximizar el ELBO.
 
 Conceptualmente, la inferencia variacional nos permite formular el problema de inferencia Bayesiana aproximada como un problema de optimización, y para esto, sabemos muy bien como utilizar PyTorch!
 
@@ -149,7 +149,7 @@ $$
 ELBO_{\phi,\theta}= \mathbb E_{\vec{z}\sim h_\phi(\vec{z}|\vec{x})}\left[\ln p_\theta(\vec{x}|\vec{z})\right] - \mathbb E_{\vec{z}\sim h_\phi(\vec{z}|\vec{x})}\left[\ln h_\phi(\vec{z}|\vec{x})-\ln p(\vec{z})\right].
 $$
 
-Como mencionado, típicamente $\vec{z}$ se toma como un vector de variable aleatorias $\vec{z}\in \mathbb R^M$ y se utilizan distribuciones gaussianas tanto para la distribución  posterior variacional $h_\phi(\vec{z}|\vec{x})=\mathcal N (\mu_{\phi}(\vec{x}), \text{diag}\left[\sigma_\phi ^2(\vec{x})\right])$ y la distribución apriori para $\vec z$, $p(\vec{z})=\mathcal N (0, \mathbf I)$. Tanto $\mu_{\phi}(\vec{x})$ como $\sigma_\phi ^2(\vec{x})$ se obtienen de la salida de $h_\phi(\vec{x})$, es decir se diseña la arquitectura para que $h_\phi(\vec{x})$ produzca $2M$ salidas que generan ambos vectores que definen la distribución condicional para $\vec z$ dado $\vec x$. Que un VAE funcione para aprender distribuciones tiene que ver con la inferencia variacional, y vimos que ésta depende de maximizar el ELBO. Veremos más adelante que resulta más fácil plantear la minimización de la KL, pero que de fondo lo que estamos haciendo es inferencia variacional basada en la maximización del ELBO. 
+Como mencionado, típicamente $\vec{z}$ se toma como un vector de variable aleatorias $\vec{z}\in \mathbb R^M$ y se utilizan distribuciones gaussianas tanto para la distribución  posterior variacional $h_\phi(\vec{z}|\vec{x})=\mathcal N (\mu_{\phi}(\vec{x}), \text{diag}\left[\sigma_\phi ^2(\vec{x})\right])$ y la distribución apriori para $\vec z$, $p(\vec{z})=\mathcal N (0, \mathbf I)$. Tanto $\mu_{\phi}(\vec{x})$ como $\sigma_\phi ^2(\vec{x})$ se obtienen de la salida de $h_\phi(\vec{x})$, es decir se diseña la arquitectura para que $h_\phi(\vec{x})$ produzca $2M$ salidas que generan ambos vectores que definen la distribución condicional para $\vec z$ dado $\vec x$. Que un VAE funcione para aprender distribuciones tiene que ver con la inferencia variacional, y vimos que ésta depende de maximizar el ELBO. Veremos más adelante que resulta más fácil plantear la minimización de la divergencia de KL, pero que de fondo lo que estamos haciendo es inferencia variacional basada en la maximización del ELBO. 
 
 Para el caso de la distribución del decoder, $p_\theta(\vec{x}|\vec z)$ tenemos que tener un leve cuidado ya que dependerá de la naturaleza de nuestros datos $\vec{x}$. Si $\vec{x}$ son imágenes, entonces tenemos pixeles y $\vec x \in \{0,1,\dots,255\}^D$. Por ende, no podemos utilizar una distribución normal para la aproximación $\vec{x'}$. Una distribución posible en este caso sería 
 
@@ -169,10 +169,10 @@ con $\epsilon \sim \mathcal N(0,I)$. Si muestreamos $\epsilon$, entonces $\vec{z
 <img src="https://raw.githubusercontent.com/mbernste/mbernste.github.io/master/images/VAE_computation_graph.png">
 
 
-Bueno, finalmente vamos a derivar la expresión que nos queda para término de pérdida por KL que utilizaremos a fines prácticos. Toda esta explicación ha sido como para entender un poco más por qué los VAE funcionan como modelos generativos. A fines prácticos, vamos a ver que 
+Bueno, finalmente vamos a derivar la expresión que nos queda para término de pérdida por divergencia de KL que utilizaremos a fines prácticos. Toda esta explicación ha sido como para entender un poco más por qué los VAE funcionan como modelos generativos. A fines prácticos, vamos a ver que 
 
 $$
-\mathcal L_{KL} = KL(h_{\phi}(\vec z|\vec x)||p(\vec z)) = - \frac{1}{2}\sum_{m=1}^M(1 + \log \sigma_{\phi}(\vec{x})_m^2 - \mu_{\phi}(\vec x)_m^2 - \exp (\log \sigma_{\phi}(\vec{x})_m^2)),
+\mathcal L_{KL} = D_{KL}(q_{\phi}(\vec z|\vec x)||p(\vec z)) = - \frac{1}{2}\sum_{m=1}^M(1 + \log \sigma_{\phi}(\vec{x})_m^2 - \mu_{\phi}(\vec x)_m^2 - \exp (\log \sigma_{\phi}(\vec{x})_m^2)),
 $$
 
 en donde $\mu_{\phi}(\vec x)_m$ $\log \sigma_{\phi}(\vec{x})_m^2$ son los elementos de la salida del encoder $h_{\phi}(\vec x)$ con $2M$ salidas (ver figura anterior para clarificar).
@@ -182,14 +182,14 @@ Demostración (no necesaria, sólo informativa):
 Podemos escribir la divergencia KL en dos términos:
 
 $$
-KL(h_{\phi}(\vec z|\vec x)||p(\vec z)) = \int h_{\phi}(\vec z|\vec x)\log h_{\phi}(\vec z|\vec x) dz - \int h_{\phi}(\vec z|\vec x) \log p(\vec z) dz.
+D_{KL}(q_{\phi}(\vec z|\vec x)||p(\vec z)) = \int q_{\phi}(\vec z|\vec x)\log q_{\phi}(\vec z|\vec x) dz - \int q_{\phi}(\vec z|\vec x) \log p(\vec z) dz.
 $$
 
 Trabajemos el primer término
 
 $$
 \begin{align}
-\int h_{\phi}(\vec z|\vec x)\log h_{\phi}(\vec z|\vec x) dz &= \int \mathcal N_z(\mu, \text{diag}\sigma^2)\log \mathcal N_z(\mu, \text{diag}\sigma^2) dz\\
+\int q_{\phi}(\vec z|\vec x)\log q_{\phi}(\vec z|\vec x) dz &= \int \mathcal N_z(\mu, \text{diag}\sigma^2)\log \mathcal N_z(\mu, \text{diag}\sigma^2) dz\\
 &= \int \mathcal N_z(\mu, \text{diag}\sigma^2) \sum_{m=1}^M \log \mathcal N_{z_m}(\mu_m, \sigma^2_m) dz \\
 &= \int \mathcal N_z(\mu, \text{diag}\sigma^2) \sum_{m=1}^M \left[\log(\frac{1}{\sqrt{ 2\pi\sigma_m^2}})-\frac{1}{2}\frac{(z_m-\mu_m)^2}{\sigma_m^2}\right]dz \\
 &= -\frac{M}{2}\log(2\pi) -\frac{1}{2}\sum_{m=1}^M\log \sigma_m^2 - \frac{1}{2}\sum_{m=1}^M \int \mathcal N_z(\mu, \text{diag}\sigma^2)\frac{(z_m-\mu_m)^2}{\sigma_m^2}dz \\
@@ -206,7 +206,7 @@ Para el segundo término, tenemos
 
 $$
 \begin{align}
-\int h_{\phi}(\vec z|\vec x) \log p(\vec z) dz &= \int \mathcal N_z(\mu, \text{diag}\sigma^2)\log \mathcal N_z(0, \mathbf I) dz \\
+\int q_{\phi}(\vec z|\vec x) \log p(\vec z) dz &= \int \mathcal N_z(\mu, \text{diag}\sigma^2)\log \mathcal N_z(0, \mathbf I) dz \\
 &= \int \mathcal N_z(\mu, \text{diag}\sigma^2)\sum_{m=1}^M\log \mathcal N_{z_m}(0, 1) dz \\
 &=-\frac{M}{2}\log(2\pi)-\frac{1}{2}\int \mathcal N_z(\mu, \text{diag}\sigma^2)\sum_{m=1}^M z_m^2 dz \text{ (mismo razonamiento que antes)} \\
 &=-\frac{M}{2}\log(2\pi)-\frac{1}{2}\sum_{m=1}^M \int z_m^2 \mathcal N_{z_m}(\mu_m,\sigma_m^2)dz_m \\
@@ -217,7 +217,7 @@ $$
 Al combinar los dos términos, llegamos a 
 
 $$
-\mathcal L_{KL} =  KL(h_{\phi}(\vec z|\vec x)||p(\vec z)) = - \frac{1}{2}\sum_{m=1}^M(1 + \log \sigma_m^2 - \mu_m^2 - \sigma_m^2),
+\mathcal L_{KL} =  D_{KL}(q_{\phi}(\vec z|\vec x)||p(\vec z)) = - \frac{1}{2}\sum_{m=1}^M(1 + \log \sigma_m^2 - \mu_m^2 - \sigma_m^2),
 $$
 que al pensar en $\mu_m$ y $\sigma_m$ como elementos de la última capa de una red neuronal se transforman  en la ecuación de interés. 
 
