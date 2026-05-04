@@ -2,3 +2,5 @@ APBF/_build/
 APBF/.DS_Store
 ejemplos/
 *.pth
+*.png
+*ubyte*
