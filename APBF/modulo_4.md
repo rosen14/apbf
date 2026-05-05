@@ -16,9 +16,17 @@ kernelspec:
 
 - [Semana_4.5.pdf](slides/Semana_4.5.pdf)
 
+- [Semana_5.pdf](slides/Semana_5.pdf)
+
 **Notebooks teórico-práctico**: 
+
 - [Semana04_MDN.ipynb](./teorico_practicos/Semana04_MDN.ipynb)
+
 - [Semana04_VAE.ipynb](./teorico_practicos/Semana04_VAE.ipynb)
+
+- [Semana05_PI_VAE.ipynb](./teorico_practicos/Semana05_PI_VAE.ipynb)
+
+- [Semana05_NFs.ipynb](./teorico_practicos/Semana05_NFs.ipynb)
 
 ```{contents}
 :local:
