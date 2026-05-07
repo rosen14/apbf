@@ -28,6 +28,8 @@ kernelspec:
 
 - [Semana05_NFs.ipynb](./teorico_practicos/Semana05_NFs.ipynb)
 
+- [Semana05_CVAE_CERN.ipynb](./teorico_practicos/Semana05_CVAE_CERN.ipynb)
+
 - [Semana05_diffusion.ipynb](./teorico_practicos/Semana05_diffusion.ipynb)
 
 - [Semana05_GANs.ipynb](./teorico_practicos/Semana05_GANs.ipynb)
