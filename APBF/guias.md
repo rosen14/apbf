@@ -4,6 +4,6 @@
 - **Guía de trabajo práctico 2:** [Guia_Semana_02_Deep_Learning_Autograd.ipynb](./practicos/Guia_Semana_02_Deep_Learning_Autograd.ipynb)
 - **Guía de trabajo práctico 3:** [Guia_Semana_03_PINNs.ipynb](./practicos/Guia_Semana_03_PINNs.ipynb)
 - **Guía de trabajo práctico 4:** [Guia_Semana_04_Fisica_Diferenciable.ipynb](./practicos/Guia_Semana_04_Fisica_Diferenciable.ipynb)
-- **Guía de trabajo práctico 5:** 
+- **Guía de trabajo práctico 5:** [Guia_Semana_05_Modelos_Probabilisticos.ipynb](./practicos/Guia_Semana_05_Modelos_Probabilisticos.ipynb)
 - **Guía de trabajo práctico 6:** 
 - **Guía de trabajo práctico 7:** 

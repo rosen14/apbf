@@ -28,6 +28,12 @@ kernelspec:
 
 - [Semana05_NFs.ipynb](./teorico_practicos/Semana05_NFs.ipynb)
 
+
+**Guía de trabajo práctico**: 
+
+- [Guia_Semana_05_Modelos_Probabilisticos.ipynb](./practicos/Guia_Semana_05_Modelos_Probabilisticos.ipynb)
+
+
 ```{contents}
 :local:
 ```
