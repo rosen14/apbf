@@ -12,6 +12,10 @@ kernelspec:
 ---
 # De Simulaciones a inferencia
 
+**Diapositivas teórico**: 
+
+- [Semana_6.pdf](slides/Semana_6.pdf)
+
 ```{contents}
 :local:
 ```
