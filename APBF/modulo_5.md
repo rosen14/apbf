@@ -16,6 +16,13 @@ kernelspec:
 
 - [Semana_6.pdf](slides/Semana_6.pdf)
 
+**Notebooks teórico-práctico**: 
+
+- [Semana06_mcmc_abc.ipynb](./teorico_practicos/Semana06_mcmc_abc.ipynb)
+- [Semana06_sbi_01.ipynb](./teorico_practicos/Semana06_sbi_01.ipynb)
+- [Semana06_sbi_02.ipynb](./teorico_practicos/Semana06_sbi_02.ipynb)
+- [Semana06_sbi_03.ipynb](./teorico_practicos/Semana06_sbi_03.ipynb)
+
 ```{contents}
 :local:
 ```
